@@ -12,48 +12,44 @@ Wire::~Wire()
  
 int Wire::getCutWires()
 {
-    format = formatvoltage(analogRead(analogPin1));
-    //Serial.println(format);
-    int wires = 0;
- 
-    if(format%2!=0)
-    {
-      wires |= 1;
-    }
-    format/=2;
-    if(format%2!=0)
-    {
-       wires |= 2;
-    }
-    format/=2;
-    if(format%2!=0)
-    {
-      wires |= 4;
-    }
-    format/=2;
-    if(format%2!=0)
-    {
-      wires |= 8;
-    }
 
-    return wires;
-}
+    int wireValue = analogRead(analogPin1);
+    //Serial.println(wireValue);
+    uint8_t wireState = 0b0000;
 
 
-//Fonction qui permet de transformer la valeur de voltage en un multiple entier de la constante INCREMENTVOLTAGE. La fonction filtre aussi pour une incertitude raisonnable.
-//Prend en paramètre la valeur de voltage. 
-//Retourne le multiple de INCREMENTVOLTAGE calculé.
-int Wire::formatvoltage(float voltage)
-{
-  int format=0;
-  while (voltage>INCREMENTVOLTAGE)
-  {
-    voltage-=INCREMENTVOLTAGE;
-    format++;
-  }	
-  if (voltage>INCREMENTVOLTAGE/2)
-  {
-	format++;  
-  }
-  return format;
+    if (abs(WIRE_0000 - wireValue) <= WIRE_SENSIBILITY)
+        wireState = 0b0000;
+    else if (abs(WIRE_0001 - wireValue) <= WIRE_SENSIBILITY)
+        wireState = 0b0001;
+    else if (abs(WIRE_0010 - wireValue) <= WIRE_SENSIBILITY)
+        wireState = 0b0010;
+    else if (abs(WIRE_0011 - wireValue) <= WIRE_SENSIBILITY)
+        wireState = 0b0011;
+    else if (abs(WIRE_0100 - wireValue) <= WIRE_SENSIBILITY)
+        wireState = 0b0100;
+    else if (abs(WIRE_0101 - wireValue) <= WIRE_SENSIBILITY)
+        wireState = 0b0101;
+    else if (abs(WIRE_0110 - wireValue) <= WIRE_SENSIBILITY)
+        wireState = 0b0110;
+    else if (abs(WIRE_0111 - wireValue) <= WIRE_SENSIBILITY)
+        wireState = 0b0111;
+    else if (abs(WIRE_1000 - wireValue) <= WIRE_SENSIBILITY)
+        wireState = 0b1000;
+    else if (abs(WIRE_1001 - wireValue) <= WIRE_SENSIBILITY)
+        wireState = 0b1001;
+    else if (abs(WIRE_1010 - wireValue) <= WIRE_SENSIBILITY)
+        wireState = 0b1010;
+    else if (abs(WIRE_1011 - wireValue) <= WIRE_SENSIBILITY)
+        wireState = 0b1011;
+    else if (abs(WIRE_1100 - wireValue) <= WIRE_SENSIBILITY)
+        wireState = 0b1100;
+    else if (abs(WIRE_1101 - wireValue) <= WIRE_SENSIBILITY)
+        wireState = 0b1101;
+    else if (abs(WIRE_1110 - wireValue) <= WIRE_SENSIBILITY)
+        wireState = 0b1110;
+    else if (abs(WIRE_1111 - wireValue) <= WIRE_SENSIBILITY)
+        wireState = 0b1111;
+
+    return wireState;
 }

@@ -13,20 +13,33 @@
  
 #include <Arduino.h>
 
-#define INCREMENTVOLTAGE 65.9835
+#define WIRE_0000 0
+#define WIRE_0001 99
+#define WIRE_0010 207
+#define WIRE_0011 303
+#define WIRE_0100 371
+#define WIRE_0101 458
+#define WIRE_0110 543
+#define WIRE_0111 624
+#define WIRE_1000 599
+#define WIRE_1001 667
+#define WIRE_1010 731
+#define WIRE_1011 795
+#define WIRE_1100 819
+#define WIRE_1101 879
+#define WIRE_1110 933
+#define WIRE_1111 991
+#define WIRE_SENSIBILITY 15
  
 class Wire 
 {
 public:
-    Wire(uint8_t analogPin1);
- 
+    Wire(uint8_t analogPin1); 
     ~Wire();
  
     int getCutWires();
-    int formatvoltage(float voltage);
  
 private:
-    int format;
     uint8_t analogPin1;
 };
 

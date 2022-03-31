@@ -172,7 +172,7 @@ void loop()
     wire_valeur = wire.getCutWires();
     // Serial.println(wire_valeur);
 
-    if (abs(wire_valeur - wire_valeurPrecedente) > 20)
+    if (wire_valeurPrecedente != wire_valeur)
     {
       int wireValue[1] = {wire_valeur};
       // Serial.println(wire_valeur);
