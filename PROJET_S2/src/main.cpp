@@ -120,7 +120,8 @@ enum etatModule
   WIRE,
   PADLOCK,
   MEMORY,
-  KEYPAD
+  KEYPAD,
+  LED
 
 } EtatModule;
 
@@ -178,11 +179,11 @@ void loop()
     break;
   case WIRE:
     wire_valeur = wire.getCutWires();
-    Serial.println(wire_valeur);
+    //Serial.println(wire_valeur);
 
-    if(wire_valeur && (wire_valeurPrecedente != wire_valeur)){
+    if(abs(wire_valeur - wire_valeurPrecedente) > 20){
       int wireValue[1] = {wire_valeur};
-      Serial.println(wire_valeur);
+      //Serial.println(wire_valeur);
       sendData(MODULE_WIRES, wireValue, 1);
     }
     wire_valeurPrecedente = wire_valeur;
@@ -230,6 +231,8 @@ void loop()
 
     break;
   }
+
+  if()
 
   if (accelerometre.getStateFlag())
   {
