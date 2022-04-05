@@ -12,9 +12,9 @@
 
 // positions possibles du jostick et leur valeur associée
 #define RIGHT 2
-#define LEFT 1
-#define UP 3
-#define DOWN 4
+#define LEFT 4
+#define UP 1
+#define DOWN 3
 
 // constructeur set les pin du joystick
 Padlock::Padlock(uint8_t inputX, uint8_t inputY)

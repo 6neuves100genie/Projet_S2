@@ -151,7 +151,7 @@ void setup()
   keypad_touchePrecedente = 0;
 
   // wire
-  wire_valeurPrecedente = 0;
+  wire_valeurPrecedente = wire.getCutWires();
 
   // loop
   EtatModule = INIT;
@@ -159,7 +159,7 @@ void setup()
 
 void loop()
 {
-  // Serial.println(EtatModule);
+  //Serial.println(EtatModule);
 
   switch (EtatModule)
   {
@@ -169,13 +169,13 @@ void loop()
 
     break;
   case WIRE:
+    delay(200);
     wire_valeur = wire.getCutWires();
-    // Serial.println(wire_valeur);
-
+    //Serial.println(wire_valeurPrecedente);
     if (wire_valeurPrecedente != wire_valeur)
     {
       int wireValue[1] = {wire_valeur};
-      // Serial.println(wire_valeur);
+      //Serial.println(wire_valeurPrecedente);
       sendData(MODULE_WIRES, wireValue, 1);
     }
     wire_valeurPrecedente = wire_valeur;
@@ -228,8 +228,8 @@ void loop()
 
     uint8_t *DigitalValue = gestionLED.getAll();
 
-    DigitalValue[0] = ((0b01111111 & DigitalValue[0]) | (LEDState & 0b1000)); //led 4
-    DigitalValue[1] = ((0b00011111 & DigitalValue[1]) | (LEDState & 0b0100)); //led 3 2 1
+    DigitalValue[0] = ((0b01111111 & DigitalValue[0]) | ((LEDState & 0b1000)<< 4)); //led 4
+    DigitalValue[1] = ((0b00011111 & DigitalValue[1]) | ((LEDState & 0b0111)<< 5)); //led 3 2 1
 
     gestionLED.setAll(DigitalValue);
 
@@ -244,7 +244,7 @@ void loop()
     accelerometre_tabValue[1] = accelerometre.getY_value();
     accelerometre_tabValue[2] = accelerometre.getZ_value();
 
-    // sendData(MODULE_ACCELEROMETRE, accelerometre_tabValue, 3);
+     sendData(MODULE_ACCELEROMETRE, accelerometre_tabValue, 3);
   }
 
   if (BombeStateFlag)
