@@ -64,7 +64,7 @@
 class Memory 
 {
 public:
-    Memory(ShiftRegister74HC595<2> &_gestionLED, uint8_t analogReadPin, uint8_t sendReadPin);
+    Memory(ShiftRegister74HC595<2> *_gestionLED, uint8_t analogReadPin, uint8_t sendReadPin);
     Memory();
     ~Memory();
 
@@ -77,7 +77,7 @@ public:
     
 
 private:
-    ShiftRegister74HC595<2> gestionLED;
+    ShiftRegister74HC595<2> *gestionLED;
 
 };
 

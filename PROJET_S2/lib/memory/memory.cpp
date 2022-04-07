@@ -21,7 +21,7 @@ bool stateSWFlag;
  * @param switchReadPin
  * @param sendReadPin
  */
-Memory::Memory(ShiftRegister74HC595<2> &_gestionLED, uint8_t analogReadPin, uint8_t sendReadPin)
+Memory::Memory(ShiftRegister74HC595<2> *_gestionLED, uint8_t analogReadPin, uint8_t sendReadPin)
 {
     gestionLED = _gestionLED;
 
@@ -107,7 +107,10 @@ void Memory::MemoryInit()
  */
 void Memory::setNumber(uint8_t number)
 {
-    uint8_t *DigitalValue = gestionLED.getAll();
+    uint8_t *DigitalValue = gestionLED->getAll();
+    
+    //Serial.print(DigitalValue[0]);
+    //Serial.print(DigitalValue[1]);
 
     if (number == 0)
         DigitalValue[SEGMENT_ID] = ((SEGMENT_MASQUE & DigitalValue[SEGMENT_ID]) | SEGMENT_0);
@@ -132,7 +135,7 @@ void Memory::setNumber(uint8_t number)
     else if (number == 10)
         DigitalValue[SEGMENT_ID] = ((SEGMENT_MASQUE & DigitalValue[SEGMENT_ID]) | SEGMENT_INITIALE);
 
-    gestionLED.setAll(DigitalValue);
+    gestionLED->setAll(DigitalValue);
 }
 
 /**
@@ -142,7 +145,7 @@ void Memory::setNumber(uint8_t number)
  */
 void Memory::setLevel(uint8_t level)
 {
-    uint8_t *DigitalValue = gestionLED.getAll();
+    uint8_t *DigitalValue = gestionLED->getAll();
 
     if (level == 1)
         DigitalValue[BARGRAPH_ID] = ((NIVEAU_MASQUE & DigitalValue[BARGRAPH_ID]) | NIVEAU_1);
@@ -155,7 +158,7 @@ void Memory::setLevel(uint8_t level)
     else if (level == 5)
         DigitalValue[BARGRAPH_ID] = ((NIVEAU_MASQUE & DigitalValue[BARGRAPH_ID]) | NIVEAU_5);
 
-    gestionLED.setAll(DigitalValue);
+    gestionLED->setAll(DigitalValue);
 }
 
 /**

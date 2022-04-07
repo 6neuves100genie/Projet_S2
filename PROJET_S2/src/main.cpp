@@ -63,6 +63,7 @@
 int indexData;
 bool commandeValid;
 int idModule;
+int idModule_precedent;
 bool BombeStateFlag;
 bool BombeState;
 bool LEDStateFlag;
@@ -101,8 +102,11 @@ int valuePadlock;
 int wire_valeurPrecedente;
 int wire_valeur;
 
+/**     LED         **/
+char tabLEDData[2];
+
 ShiftRegister74HC595<2> gestionLED(MEMORY_RCLK_PIN, MEMORY_SRCLK_PIN, MEMORY_SER_PIN);
-Memory memory(gestionLED, MEMORY_ANALOG_PIN, MEMORY_DIGITAL_PIN);
+Memory memory(&gestionLED, MEMORY_ANALOG_PIN, MEMORY_DIGITAL_PIN);
 Accelerometre accelerometre(ACCELEROMETRE_X_PIN, ACCELEROMETRE_Y_PIN, ACCELEROMETRE_Z_PIN);
 Keypad keypad(KEYPAD_DIGITAL_SW1, KEYPAD_DIGITAL_SW2, KEYPAD_DIGITAL_SW3, KEYPAD_DIGITAL_SW4);
 Padlock padlock(PADLOCK_ANALOG_X_PIN, PADLOCK_ANALOG_Y_PIN);
@@ -119,6 +123,10 @@ enum etatModule
   LED
 } EtatModule;
 
+/**
+ * @brief
+ *
+ */
 void setup()
 {
   // put your setup code here, to run once:
@@ -157,25 +165,29 @@ void setup()
   EtatModule = INIT;
 }
 
+/**
+ * @brief
+ *
+ */
 void loop()
 {
-  //Serial.println(EtatModule);
+  // Serial.println(EtatModule);
 
   switch (EtatModule)
   {
   case INIT:
-    memory.setNumber(10);
-    memory.setLevel(1);
+    // memory.setNumber(10);
+    // memory.setLevel(1);
 
     break;
   case WIRE:
     delay(200);
     wire_valeur = wire.getCutWires();
-    //Serial.println(wire_valeurPrecedente);
+    // Serial.println(wire_valeurPrecedente);
     if (wire_valeurPrecedente != wire_valeur)
     {
       int wireValue[1] = {wire_valeur};
-      //Serial.println(wire_valeurPrecedente);
+      // Serial.println(wire_valeurPrecedente);
       sendData(MODULE_WIRES, wireValue, 1);
     }
     wire_valeurPrecedente = wire_valeur;
@@ -196,9 +208,6 @@ void loop()
     break;
 
   case MEMORY:
-
-    memory.setNumber(memoryNumber);
-    memory.setLevel(memoryLevel);
 
     if (memory.getSendBTNState() && !memory_relacheBouton)
     {
@@ -228,10 +237,32 @@ void loop()
 
     uint8_t *DigitalValue = gestionLED.getAll();
 
-    DigitalValue[0] = ((0b01111111 & DigitalValue[0]) | ((LEDState & 0b1000)<< 4)); //led 4
-    DigitalValue[1] = ((0b00011111 & DigitalValue[1]) | ((LEDState & 0b0111)<< 5)); //led 3 2 1
+    //Serial.print(DigitalValue[0]);
+    // Serial.println((((LEDState << 4) & 0b10000000)));
+    //Serial.print(DigitalValue[1]);
+    // Serial.println((((LEDState << 5) & 0b11100000)));
+
+    DigitalValue[0] = (0b01111111 & DigitalValue[0]) | (((LEDState << 4) & 0b10000000)); // led 4
+    DigitalValue[1] = (0b00011111 & DigitalValue[1]) | (((LEDState << 5) & 0b11100000)); // led 3 2 1
+
+    // DigitalValue[0] = 0b11111111;
+    // DigitalValue[1] = 0b11100001;
 
     gestionLED.setAll(DigitalValue);
+    // Serial.println(DigitalValue[0]);
+    // Serial.println(DigitalValue[1]);
+    // Serial.println(LEDState);
+
+    if (idModule_precedent == 0)
+      EtatModule = INIT;
+    else if (idModule_precedent == 1)
+      EtatModule = WIRE;
+    else if (idModule_precedent == 2)
+      EtatModule = PADLOCK;
+    else if (idModule_precedent == 3)
+      EtatModule = MEMORY;
+    else if (idModule_precedent == 4)
+      EtatModule = KEYPAD;
 
     break;
   }
@@ -244,7 +275,7 @@ void loop()
     accelerometre_tabValue[1] = accelerometre.getY_value();
     accelerometre_tabValue[2] = accelerometre.getZ_value();
 
-     sendData(MODULE_ACCELEROMETRE, accelerometre_tabValue, 3);
+    // sendData(MODULE_ACCELEROMETRE, accelerometre_tabValue, 3);
   }
 
   if (BombeStateFlag)
@@ -320,6 +351,9 @@ bool etatTransitionModule(char rxData)
 
     if (('0' <= rxData) && (rxData <= '7'))
     {
+      if (idModule != 6)
+        idModule_precedent = idModule;
+
       idModule = rxData - '0';
       // Serial.println(idModule);
     }
@@ -362,13 +396,22 @@ bool etatTransitionModule(char rxData)
     break;
 
   case LED_DATA:
-    char tabLEDData[2];
 
     if ((rxData >= '0') && (rxData <= '9'))
+    {
       tabLEDData[indexData++] = rxData;
+    }
+
     else if (rxData == ',')
     {
+      if (indexData == 1)
+      {
+        tabLEDData[1] = tabLEDData[0];
+        tabLEDData[0] = '0';
+      }
+
       LEDState = atoi(tabLEDData);
+      // Serial.println(LEDState);
       EtatTransition = END_DATA;
     }
     else
@@ -418,7 +461,12 @@ bool etatTransitionModule(char rxData)
       else if (idModule == 2)
         EtatModule = PADLOCK;
       else if (idModule == 3)
+      {
+        memory.setNumber(memoryNumber);
+        memory.setLevel(memoryLevel);
+
         EtatModule = MEMORY;
+      }
       else if (idModule == 4)
         EtatModule = KEYPAD;
       else if (idModule == 6)
@@ -470,7 +518,7 @@ bool sendData(int module, int *tabData, uint8_t tabSize)
   txData[index] = '\0';
 
   Serial.print(txData);
-  Serial.println();
+  // Serial.println();
 
   return 0;
 }
